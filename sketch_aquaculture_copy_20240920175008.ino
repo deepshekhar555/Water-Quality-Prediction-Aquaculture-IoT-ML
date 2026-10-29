@@ -43,12 +43,8 @@ void setup() {
   // lcd.setCursor(0, 0); // Set cursor to first column of first row
   // lcd.print("Turbidity:");
 
-  // Print initial message to serial monitor
-  Serial.println("Turbidity Monitoring System");
-  Serial.print("Found ");
-  Serial.print(sensors.getDeviceCount(), DEC);
   delay(500);
-  Serial.println(" DS18B20 devices");
+  Serial.println("sample_id,timestamp_ms,pH,temperature_c,turbidity_ntu");
 }
 
 void loop() {
@@ -70,8 +66,6 @@ void loop() {
   float volt = (float)avgval * 5.0 / 1024 / 6;
   ph_act = -5.70 * volt + calibration_value;
 
-  Serial.println("pH Val: ");
-  Serial.print(ph_act);
   // lcd.clear(); // Clear the LCD screen
   lcd.setCursor(9, 0);  // Set cursor to first column, first row
   lcd.print("PH:");
@@ -102,12 +96,6 @@ void loop() {
     lcd.print(turbidityCategory);
   }
 
-  // Print turbidity value and category to serial monitor
-  Serial.print("Turbidity: ");
-  Serial.print(turbidity);
-  Serial.print("Category: ");
-  Serial.println(turbidityCategory);
-
   // Print turbidity value and category to LCD
   // lcd.setCursor(0, 0); // Set cursor to first column of second row
   // lcd.print("V:");
@@ -121,7 +109,6 @@ void loop() {
 
   // Check if any devices are found
   if (sensors.getDeviceCount() == 0) {
-    Serial.println("No DS18B20 devices found");
     lcd.setCursor(0, 0);
     lcd.print("No DS18B20 found");
     //delay(3000);
@@ -130,21 +117,11 @@ void loop() {
   // Get temperature from the sensor
   float temperatureCelsius = sensors.getTempCByIndex(0);
 
-  // Check if temperature reading is valid
-  // if (temperatureCelsius == DEVICE_DISCONNECTED_C) {
-  //   Serial.println("Error: DS18B20 device disconnected");
-  //   lcd.setCursor(0, 0);
-  //   lcd.print("Error: DS18B20");
-  //   lcd.setCursor(0, 1);
-  //   lcd.print("disconnected");
-  //   delay(1000);
-  //   return; // Exit loop if device disconnected
-  // }
-
-  // Print temperature to serial monitor
-  Serial.print("Temperature: ");
-  Serial.print(temperatureCelsius);
-  Serial.println(" °C");
+  if (temperatureCelsius == DEVICE_DISCONNECTED_C) {
+    lcd.setCursor(0, 0);
+    lcd.print("Temp sensor error");
+    return;
+  }
 
   // Display temperature on LCD
   //lcd.clear();
@@ -160,4 +137,15 @@ void loop() {
   lcd.print(int(turbidity));
   lcd.print(",");
   lcd.print("C:");
+
+  unsigned long sampleTimestamp = millis();
+  Serial.print(sampleTimestamp);
+  Serial.print(',');
+  Serial.print(sampleTimestamp);
+  Serial.print(',');
+  Serial.print(ph_act, 2);
+  Serial.print(',');
+  Serial.print(temperatureCelsius, 2);
+  Serial.print(',');
+  Serial.println(turbidity, 1);
 }

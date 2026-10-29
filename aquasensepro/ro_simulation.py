@@ -14,12 +14,12 @@ Per the PDF (BioTwinLabs_Track2.pdf), Track 2 — ReGen-X core requirements:
 - Separate mineral-recovery module for calcium and magnesium
 - Electrodialysis process and controlled mineral dosing
 - Track input water, permeate, reject volume, recovered mineral quantities, mass balance
-- Configurable dosing limits, sensor checks, fail-safe shutoff
+- Configurable dosing limits, sensor checks, and fail-safe shutoff
 """
-
 import json
 import math
 import os
+import time
 from dataclasses import dataclass, field
 from typing import Dict, List, Optional, Any
 from datetime import datetime, timezone
@@ -400,4 +400,3 @@ def check_ro_safety(
    # model outputs from the aquaculture project have been preserved in the repo
    # but are not applied to purifier predictions (Phase Three adaptation).
 #
-"""
