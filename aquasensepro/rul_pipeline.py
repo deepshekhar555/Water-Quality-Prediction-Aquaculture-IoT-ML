@@ -13,6 +13,7 @@ import time
 from typing import Dict, List, Optional, Any, Tuple
 import numpy as np
 import pandas as pd
+from sklearn.linear_model import LinearRegression
 
 from .foundation import SensorReading, now_iso8601, ENABLE_SIMULATION
 
@@ -108,6 +109,7 @@ class XGBoostRULPipeline:
         self.model_path = model_path
         self.walk_forward_cutoff_frac = walk_forward_cutoff_frac
         self.model = None
+        self.model_backend: Optional[str] = None
         self.feature_names = [
             "dRc_dt_proxy", "operating_hours", "flow_ratio",
             "pressure_bar", "pressure_rise_rate",
@@ -140,35 +142,33 @@ class XGBoostRULPipeline:
         train_df = df.iloc[:cutoff_idx].copy()
         test_df = df.iloc[cutoff_idx:].copy()
 
-        if XGBOOST_AVAILABLE and xgb.XGBRegressor is not None:
-            X_train = train_df[feature_cols].values
-            y_train = train_df[target_col].values
-            X_test = test_df[feature_cols].values
-            y_test = test_df[target_col].values
+        X_train = train_df[feature_cols].values
+        y_train = train_df[target_col].values
+        X_test = test_df[feature_cols].values
+        y_test = test_df[target_col].values
 
+        if XGBOOST_AVAILABLE and xgb.XGBRegressor is not None:
             self.model = xgb.XGBRegressor(
                 n_estimators=100, learning_rate=0.1, max_depth=3,
                 subsample=0.8, colsample_bytree=0.8, random_state=42,
             )
-            self.model.fit(X_train, y_train)
-
-            y_pred = self.model.predict(X_test)
-
-            mae = float(np.mean(np.abs(y_pred - y_test)))
-            rmse = float(np.sqrt(np.mean((y_pred - y_test) ** 2)))
-            ss_res = np.sum((y_test - y_pred) ** 2)
-            ss_tot = np.sum((y_test - np.mean(y_test)) ** 2)
-            r2 = 1.0 - (ss_res / ss_tot) if ss_tot != 0 else float("nan")
-
-            self.metrics = {"mae": mae, "rmse": rmse, "r2": r2}
-            self.is_trained = True
-            self.train_history = train_df
-            self.test_history = test_df
+            self.model_backend = "xgboost"
         else:
-            self.is_trained = True
-            self.metrics = {"mae": 30.0 * 0.1, "rmse": 30.0 * 0.15, "r2": 0.6}
-            self.train_history = train_df.head(50) if len(df) > 50 else train_df
-            self.test_history = df.iloc[cutoff_idx:] if cutoff_idx < len(df) else pd.DataFrame()
+            self.model = LinearRegression()
+            self.model_backend = "scikit-learn LinearRegression baseline"
+
+        self.model.fit(X_train, y_train)
+        y_pred = self.model.predict(X_test)
+        mae = float(np.mean(np.abs(y_pred - y_test)))
+        rmse = float(np.sqrt(np.mean((y_test - y_pred) ** 2)))
+        ss_res = np.sum((y_test - y_pred) ** 2)
+        ss_tot = np.sum((y_test - np.mean(y_test)) ** 2)
+        r2 = 1.0 - (ss_res / ss_tot) if ss_tot != 0 else float("nan")
+
+        self.metrics = {"mae": mae, "rmse": rmse, "r2": r2}
+        self.is_trained = True
+        self.train_history = train_df
+        self.test_history = test_df
 
         if self.model is not None and self.model_path is not None:
             try:
@@ -179,6 +179,7 @@ class XGBoostRULPipeline:
                 pass
 
         return {
+            **self.metrics,
             "metrics": self.metrics,
             "train_cutoff_idx": cutoff_idx,
             "train_set_size": len(train_df),
@@ -209,6 +210,9 @@ class XGBoostRULPipeline:
         except Exception:
             pred_days = None
 
+        if pred_days is not None:
+            pred_days = max(0.0, pred_days)
+
         pred_liters = None
         if pred_days is not None and pred_days > 0:
             pred_liters = round(pred_days * 24.0 * 2.0, 1)
@@ -216,7 +220,7 @@ class XGBoostRULPipeline:
         return {
             "rul_days": round(pred_days, 1) if pred_days is not None else None,
             "rul_liters": pred_liters,
-            "model_version": getattr(self.model, 'version', 'xgboost') if self.model else 'untrained',
+            "model_version": self.model_backend or "untrained",
             "metrics": self.metrics,
         }
 
@@ -228,6 +232,7 @@ class XGBoostRULPipeline:
                 "model": self.model, "metrics": self.metrics,
                 "is_trained": self.is_trained, "feature_names": self.feature_names,
                 "walk_forward_cutoff_frac": self.walk_forward_cutoff_frac,
+                "model_backend": self.model_backend,
             }, f)
 
     @classmethod
@@ -241,6 +246,7 @@ class XGBoostRULPipeline:
             pipeline.is_trained = data.get("is_trained", False)
             pipeline.feature_names = data.get("feature_names", pipeline.feature_names)
             pipeline.walk_forward_cutoff_frac = data.get("walk_forward_cutoff_frac", 0.8)
+            pipeline.model_backend = data.get("model_backend")
         except Exception:
             pass
         return pipeline

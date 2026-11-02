@@ -1,0 +1,106 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>AtomQuest 2026 Round 2 Progress Report | BioTwin Labs</title>
+  <style>
+    @page { size: A4; margin: 0; }
+    * { box-sizing: border-box; }
+    body { margin: 0; color: #172b3a; background: #e8edf0; font: 9pt/1.26 "Segoe UI", Arial, sans-serif; }
+    .page { position: relative; width: 210mm; height: 297mm; margin: 10mm auto; padding: 14mm 15mm 15mm; overflow: hidden; background: #fff; page-break-after: always; }
+    .page:last-child { page-break-after: auto; }
+    .topline { display: flex; justify-content: space-between; padding-bottom: 5px; border-bottom: 2px solid #073d73; color: #586976; font-size: 7.5pt; text-transform: uppercase; }
+    h1 { margin: 12px 0 2px; color: #073d73; font-size: 23pt; line-height: 1.05; }
+    .subtitle { margin: 0 0 10px; color: #087f82; font-size: 10.5pt; font-weight: 700; }
+    h2 { margin: 10px 0 4px; padding-bottom: 3px; border-bottom: 1px solid #b8cbd7; color: #073d73; font-size: 11pt; }
+    h3 { margin: 6px 0 2px; color: #087f82; font-size: 9.2pt; }
+    p { margin: 3px 0 5px; }
+    ul, ol { margin: 3px 0 6px; padding-left: 17px; }
+    li { margin: 2px 0; }
+    table { width: 100%; margin: 4px 0 7px; border-collapse: collapse; font-size: 8pt; }
+    th { padding: 5px; color: #fff; background: #073d73; text-align: left; }
+    td { padding: 4px 5px; border: 1px solid #cbd6dc; vertical-align: top; }
+    tr:nth-child(even) td { background: #f2f6f7; }
+    .meta { display: grid; grid-template-columns: 1fr 1fr; gap: 4px 12px; padding: 7px 9px; border: 1px solid #cbd6dc; background: #f5f8f9; font-size: 8pt; }
+    .meta b { color: #073d73; }
+    .callout { margin: 6px 0; padding: 7px 9px; border-left: 3px solid #d68d00; background: #fff5dc; }
+    .status { margin: 6px 0; padding: 7px 9px; border-left: 3px solid #087f82; background: #eaf5f3; }
+    .small { color: #536875; font-size: 7.5pt; }
+    .footer { position: absolute; right: 15mm; bottom: 8mm; left: 15mm; display: flex; justify-content: space-between; border-top: 1px solid #cbd6dc; padding-top: 4px; color: #657784; font-size: 7pt; }
+    .tag { color: #8a5700; font-weight: 700; }
+    @media print { body { background: #fff; } .page { margin: 0; } }
+  </style>
+</head>
+<body>
+  <section class="page">
+    <div class="topline"><span>AtomQuest 2026 · Track 2: Water Purifier</span><span>Round 2 · Prototype Progress</span></div>
+    <h1>AquaSense Pro &amp; ReGen-X</h1>
+    <p class="subtitle">Smart multi-spectral sensing, mineral recovery, and filter-life prognostics</p>
+    <div class="meta">
+      <div><b>Team:</b> BioTwin Labs</div><div><b>Institution:</b> Adamas University, Kolkata</div>
+      <div><b>Team lead:</b> Deep Shekhar Halder</div><div><b>Track:</b> Track 2 — Water Purifier</div>
+      <div><b>Members:</b> Lidiya, Shubham Kumar Sain, Rituraj Saha, Saurya Jain</div><div><b>Faculty advisor:</b> Dr. A. K. Banerjee</div>
+      <div><b>Report date:</b> 2 November 2026</div><div><b>Submission deadline:</b> 4 November 2026, 11:59 PM IST</div>
+    </div>
+    <div class="status"><b>Evidence-based status:</b> A separate purifier-focused dashboard presents Live USB, Upload CSV, and Simulation modes on the main page. The repository includes a 12-row simulated example CSV for chart preview. No board was connected during verification. Physical purifier assembly, sensor calibration, and hardware safety tests are <b>not verified by the evidence available for this report</b>.</div>
+
+    <h2>1. Problem and Proposed Solution</h2>
+    <p>Single-parameter TDS monitoring can miss turbidity and organic-load changes. Conventional RO also sends mineral-bearing reject water to drain, while fixed filter schedules can replace cartridges too early or too late. AquaSense Pro proposes pH, TDS, turbidity, and UV254 sensing around an RO purifier; ReGen-X proposes electrodialysis-based calcium/magnesium recovery and controlled redosing. Pressure, flow, and operating history are intended to support filter-life estimates. These are design goals, not validated performance results.</p>
+
+    <h2>2. Progress and Components</h2>
+    <table>
+      <thead><tr><th>Area</th><th>Evidence in the current repository</th><th>Round 2 status</th></tr></thead>
+      <tbody>
+        <tr><td>Sensor data foundation</td><td>Partial-channel schema, range checks, and a live serial reader matched to the included sketch's pH, temperature, and turbidity CSV.</td><td>Serial path is implemented; no board was attached during verification. Sensor calibration and the remaining TDS/UV254/pressure/flow channels are unverified.</td></tr>
+        <tr><td>RO / ReGen-X</td><td>RO flow state, mass-balance flag, ED recovery and dosing simulation paths.</td><td>Simulation only; physical membrane, ED cell, pumps, and measured mass balance not verified.</td></tr>
+        <tr><td>Filter prognostics</td><td>Threshold monitor and chronological RUL pipeline with XGBoost or a scikit-learn baseline fallback.</td><td>Software tests pass on synthetic data; no validated purifier dataset or field-accuracy claim is available.</td></tr>
+        <tr><td>Operator dashboard</td><td>Separate Streamlit purifier monitor exposes Live USB, Upload CSV, and Simulation modes on the main page; the project sample has 12 clearly labeled simulated records.</td><td>Live serial code is implemented but no board was connected during verification; no actuator or physical filter-status connection is verified.</td></tr>
+        <tr><td>Safety</td><td>Software/documentation describes pressure, stale-sensor, UV-C, and dosing fail-safe requirements.</td><td>Physical interlocks and fault-injection tests are not evidenced; no drinking-water safety claim is made.</td></tr>
+      </tbody>
+    </table>
+    <p><b>Software checks run:</b> serial decoder/reader 4/4, purifier telemetry 10/10, foundation 12/12, RUL pipeline 7/7, aquaculture analytics 7/7, and water-quality tests 9/9 passed. These software tests do not validate purifier hardware.</p>
+
+    <h2>3. Prototype Evidence and Budget</h2>
+    <p>The abstract lists an estimated prototype BOM of <b>INR 10,500</b>. Actual spend, purchase receipts, assembly photos, and bench-test records were not present in the project evidence reviewed. <span class="tag">Team must enter actual spend and attach proof before submission.</span> No component should be marked built or tested solely because a software module or design diagram exists.</p>
+    <p class="small">Evidence basis: current source tree and test runs, plus the team’s Round 1 abstract. This report is a factual draft for team review; confirm team details, hardware status, expenditures, and results against lab records before uploading.</p>
+    <div class="footer"><span>BioTwin Labs · Adamas University</span><span>Page 1 of 2</span></div>
+  </section>
+
+  <section class="page">
+    <div class="topline"><span>AtomQuest 2026 · Track 2: Water Purifier</span><span>Round 2 · Prototype Progress</span></div>
+    <h1 style="font-size:18pt">Risks, Safety &amp; Next Steps</h1>
+    <h2>4. Changes Since the Abstract and Open Gaps</h2>
+    <p>The project direction remains AquaSense Pro &amp; ReGen-X. The repository now includes a purifier-specific dashboard with a live USB serial reader matched to the included sketch, alongside the original aquaculture workflow. The live path is implemented but was not tested with an attached board. No performance claims are supported by physical test data in the repository.</p>
+    <ul>
+      <li>Targets still requiring measured evidence include combined TDS/turbidity/UV254 sensing, reduced mineral-bearing reject, filter-life prediction, and snap-lock replacement time.</li>
+      <li>The abstract’s stated RUL target (&gt;92%) is not an achieved result. Report it only after chronological validation on a defined held-out dataset, with MAE, RMSE, and R².</li>
+      <li>The abstract schedules final prototype readiness for 8 November, after the Round 2 deadline of 4 November. Re-plan to submit only evidence available by the deadline.</li>
+    </ul>
+
+    <h2>5. Safety and Validation Status</h2>
+    <table>
+      <thead><tr><th>Safety item</th><th>Required demonstration before claiming complete</th></tr></thead>
+      <tbody>
+        <tr><td>Pressure protection</td><td>Independent normally-closed inlet isolation above 4.5 bar; record a controlled pressure-step test.</td></tr>
+        <tr><td>Sensor faults</td><td>Stale-reading timeout (90 s target) must disable dosing and raise a visible fault; test by disconnecting a sensor.</td></tr>
+        <tr><td>UV-C / electrical isolation</td><td>Physical relay/interlock and isolated power path; verify with the actual assembly. Do not claim microbial reduction without an independent lab result.</td></tr>
+        <tr><td>Water quality / dosing</td><td>Use calibrated reference instruments and measured concentrations. Sensor output alone does not establish drinking-water safety.</td></tr>
+      </tbody>
+    </table>
+    <p><b>Current safety claim:</b> these are design requirements only. Hardware interlocks and laboratory efficacy have not been verified by the available evidence.</p>
+
+    <h2>6. Planned Work to Submission</h2>
+    <table>
+      <thead><tr><th>When</th><th>Next action and evidence to capture</th></tr></thead>
+      <tbody>
+        <tr><td>2 Nov</td><td>Confirm the actual assembled subsystem inventory and cost-to-date; attempt a serial smoke test only if the board and sensors are available.</td></tr>
+        <tr><td>3 Nov</td><td>Capture dated prototype/software evidence; run only safety checks that can be performed with the available hardware and trained supervision.</td></tr>
+        <tr><td>By 4 Nov, 11:59 PM IST</td><td>Finalize the progress report and a video no longer than 90 seconds. Show only real hardware behavior and clearly identify simulations.</td></tr>
+      </tbody>
+    </table>
+    <div class="callout"><b>Before upload:</b> replace the unconfirmed-spend note with actual INR spent and remaining budget; insert dated prototype photos and measured results; confirm that the video and report describe the same prototype state. If a hardware test is not complete, say so plainly.</div>
+    <p class="small">Round 2 evaluates demonstrated progress, prototype readiness, safety, and consistency between the video and report. This document intentionally separates implemented code, simulation, and unverified physical work.</p>
+    <div class="footer"><span>BioTwin Labs · Adamas University</span><span>Page 2 of 2</span></div>
+  </section>
+</body>
+</html>

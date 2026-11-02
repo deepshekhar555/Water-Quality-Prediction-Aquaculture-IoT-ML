@@ -75,7 +75,7 @@ def test_sensor_reading_to_mqtt_payload():
     orig = ENABLE_SIMULATION
     foundation_module.ENABLE_SIMULATION = True
     try:
-        payload_sim = r.to_mqtt_payload(sim_marker=False)
+        payload_sim = r.to_mqtt_payload(sim_marker=True)
         assert payload_sim.startswith("[[SIMULATION]]"), f"Expected SIMULATION marker, got: {payload_sim}"
     finally:
         foundation_module.ENABLE_SIMULATION = orig

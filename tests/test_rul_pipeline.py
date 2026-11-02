@@ -116,6 +116,7 @@ def test_rul_pipeline_predict():
     assert "rul_liters" in pred
     assert "metrics" in pred
     assert "model_version" in pred
+    assert pred["rul_days"] is None or pred["rul_days"] >= 0
     print(f"  Prediction: {pred}")
 
 

@@ -4,6 +4,22 @@
 **Base project:** `L:\aquasensepro\` (Aquaculture water-quality prediction using ML-IoT)
 **Purpose:** Track current implementation state, distinguish implemented/tested code from simulated features from hardware-dependent features from proposed future work.
 
+## Current Software Update — 29 October 2026
+
+This update supersedes earlier dashboard and test-status entries below where they differ.
+
+| Area | Current status |
+|---|---|
+| Purifier dashboard | `aquasensepro/purifier_app.py` presents Live USB, Upload CSV, and Simulation as visible main-page modes. The project includes `purifier_telemetry_demo_simulated.csv` with 12 marked example rows; live view displays only channels emitted by the connected sketch. |
+| Serial input | `aquasensepro/serial_telemetry.py` decodes the included sketch's 9600-baud CSV protocol and buffers readings in memory for display/download. No USB device was connected during verification. |
+| Telemetry checks | `aquasensepro/purifier_monitoring.py` validates available timestamps and numeric ranges; flow balance, pressure, and TDS calculations remain unavailable until those channels are supplied. |
+| RUL fallback | `aquasensepro/rul_pipeline.py` uses XGBoost when installed and a scikit-learn linear baseline otherwise. Reported metrics are computed on the chronological holdout; synthetic-data scores are not real-world accuracy evidence. |
+| Existing aquaculture app | `aquasensepro/app.py` remains available for the original pond-sample workflow. It is not the purifier dashboard. |
+| Physical prototype | No live sensor connection, calibrated measurement, physical ED recovery, dosing action, UV-C validation, or independent hardware interlock is demonstrated by this software update. |
+| Tests | Serial decoder/reader 4/4, purifier telemetry 10/10, foundation 12/12, RUL 7/7, aquaculture analytics 7/7, and water-quality 9/9 pass when run with the repository's test commands. |
+
+Run the purifier monitor with `python -m streamlit run aquasensepro/purifier_app.py`. Its default mode waits for a USB serial device and does not fall back to simulated data. The current sketch provides pH, temperature, and firmware-mapped turbidity only. Choose CSV or demo simulation explicitly for those alternate inputs.
+
 ---
 
 ## 1. Repository Overview
@@ -99,16 +115,15 @@ Features from the gap analysis are classified below. Each entry indicates where 
 
 | Test category | File/location | Status |
 |---|---|---|
-| Sensor input validation | `tests/test_sensor_validation.py` | `planned` — to be created |
-| Unit conversions | `tests/test_unit_conversions.py` | `planned` |
-| RO water-flow & mass balance | `tests/test_ro_mass_balance.py` | `planned` |
-| Mineral dosing limits & failure handling | `tests/test_mineral_dosing.py` | `planned` |
-| RUL model inference & evaluation | `tests/test_rul_model.py` | `planned` |
-| Filter replacement state transitions | `tests/test_filter_states.py` | `planned` |
-| Invalid sensor readings / disconnected devices | `tests/test_sensor_faults.py` | `planned` |
-| API behavior & backward compatibility | `tests/test_api_compat.py` | `planned` |
+| Test category | File/location | Status |
+|---|---|---|
+| Purifier telemetry schema, ranges, flow balance, and pressure alarms | `tests/test_purifier_monitoring.py` | 6 passed |
+| Sensor contracts and validation | `tests/test_foundation.py` | 12 passed |
+| Chronological RUL training, prediction, and persistence | `tests/test_rul_pipeline.py` | 7 passed |
+| Pond analytics regression coverage | `tests/test_aquaculture.py` | 7 passed |
+| Existing water-quality functions | `tests/test_water_quality.py` | 9 passed |
 
-No automated tests have been executed yet. Test files will be created as new source modules are added.
+Test counts above are software checks only. They do not establish sensor calibration, physical RO recovery, ED mineral recovery, or hardware safety performance.
 
 ---
 

@@ -1,26 +1,35 @@
-# Water-Quality-Prediction-in-Aquaculture-Using-Machine-Learning-Internet-Of-things
+# AquaSense Pro & ReGen-X / Aquaculture Analytics
 
-An aquaculture water-quality monitoring and analysis prototype for pond samples. The dashboard reads the included workbook, plots pH, temperature, turbidity, and dissolved-oxygen estimates, compares baseline models, and reports data-quality issues.
+This repository contains two separate software workflows: a purifier telemetry prototype dashboard for AquaSense Pro & ReGen-X, and the original aquaculture pond-sample analytics dashboard. The purifier dashboard supports CSV review and clearly labeled simulated demo data; it does not connect to live hardware or establish drinking-water safety.
 
-## Run the dashboard
+## Purifier prototype dashboard
 
 ```powershell
 python -m pip install -r requirements.txt
+python -m streamlit run aquasensepro/purifier_app.py
+```
+
+The main page shows three source options: **Live USB**, **Upload CSV**, and **Simulation**. Live USB reads the included sketch's CSV stream at 9600 baud. Connect the board and use the visible port controls; the sketch provides sample ID, uptime, pH, temperature, and firmware-mapped turbidity only. For a populated upload, use `purifier_telemetry_demo_simulated.csv` or the **Sample CSV · simulated** download; all 12 rows are explicitly marked simulated. The empty template is for adding your own measured rows. Simulation scenarios exercise nominal, pressure-trip, sensor-range, and flow-imbalance alarms, but are not hardware evidence.
+
+## Original aquaculture dashboard
+
+```powershell
 python -m streamlit run aquasensepro/app.py
 ```
 
-Streamlit prints the local URL when the dashboard starts. By default it reads `major project Final excel no.1.xlsx`. Use the sidebar to upload another `.csv` or `.xlsx` file with sample ID, pH, temperature, and turbidity columns.
-
-## Data and model notes
-
-- The supplied workbook contains repeated logger rows and 100 grouped sample records. The dashboard reports unkeyed readings separately from incomplete sample groups.
-- Dissolved oxygen and the composite water-quality score are derived using the empirical equations in the supplied paper. They are estimates, not direct DO measurements or validated safety classifications.
-- Cross-validation uses shuffled folds to compare model reconstruction. The current workbook has no timestamps or independent target labels, so these metrics are not future-condition forecast performance.
-- The Arduino sketch reads pH, temperature, and turbidity locally. Live telemetry is not connected to the dashboard.
+This dashboard analyzes the included aquaculture workbook. It is not the purifier monitor and does not connect to live sensors.
 
 ## Tests
 
 ```powershell
+python -m unittest discover -s tests -p "test_purifier_monitoring.py"
+python -m unittest discover -s tests -p "test_serial_telemetry.py"
+python tests/test_foundation.py
+python tests/test_rul_pipeline.py
 python tests/test_aquaculture.py
 python tests/test_water_quality.py
 ```
+
+## Prototype evidence boundary
+
+Software simulations, uploaded telemetry, and dashboard alarms are not evidence of physical RO recovery, electrodialysis mineral recovery, calibrated sensor performance, tested safety interlocks, or drinking-water safety. RUL estimates require a real, documented, chronologically held-out dataset before any accuracy claim.

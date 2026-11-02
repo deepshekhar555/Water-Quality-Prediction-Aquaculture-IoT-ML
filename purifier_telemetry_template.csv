@@ -1,0 +1,1 @@
+timestamp,ph,temperature_c,raw_tds_ppm,permeate_tds_ppm,turbidity_ntu,uv254_abs,pressure_bar,feed_lpm,permeate_lpm,reject_lpm,calcium_mg_l,magnesium_mg_l,filter_operating_l
